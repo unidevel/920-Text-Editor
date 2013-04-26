@@ -15,32 +15,66 @@
 
 package com.jecelyin.widget;
 
-import android.app.*;
-import android.content.*;
-import android.content.pm.*;
-import android.content.res.*;
-import android.graphics.*;
-import android.os.*;
-import android.text.*;
-import android.text.method.*;
-import android.text.style.*;
-import android.util.*;
-import android.view.*;
-import android.view.inputmethod.*;
-import android.widget.*;
-import com.jecelyin.colorschemes.*;
-import com.jecelyin.editor.*;
-import com.jecelyin.editor.UndoParcel.*;
-import com.jecelyin.highlight.*;
-import com.jecelyin.util.*;
-import io.emmet.*;
-import io.emmet.editor920.*;
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
-import java.util.zip.*;
-
+import io.emmet.Emmet;
+import io.emmet.editor920.EmmetEditorImpl;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.ClipboardManager;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.Layout;
+import android.text.Selection;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.TextWatcher;
+import android.text.method.MetaKeyKeyListener;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.Touch;
+import android.text.style.ParagraphStyle;
+import android.text.style.TabStopSpan;
+import android.text.style.URLSpan;
+import android.util.AttributeSet;
+import android.util.FloatMath;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.KeyEvent;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.Scroller;
+import android.widget.Toast;
+import com.jecelyin.colorschemes.ColorScheme;
+import com.jecelyin.editor.JecEditor;
+import com.jecelyin.editor.R;
+import com.jecelyin.editor.UndoParcel;
+import com.jecelyin.editor.UndoParcel.TextChange;
+import com.jecelyin.highlight.Highlight;
+import com.jecelyin.util.FileUtil;
+import com.jecelyin.util.TextUtil;
+import com.jecelyin.util.TimeUtil;
 
 public class JecEditText extends EditText
 {
@@ -54,7 +88,7 @@ public class JecEditText extends EditText
     private Path[] mWhiteSpacePaths = new Path[]{ mTabPath, mLineBreakPath };
     private TextPaint mTextPaint;
     private TextPaint mWorkPaint;
-    /** 缩放比例 */
+	/** 缩放比例 */
 
     private int paddingLeft = 0;
     private int lastPaddingLeft = 0;
@@ -65,33 +99,33 @@ public class JecEditText extends EditText
     private FastScroller mFastScroller;
     private Layout mLayout;
     private Editable mText = null;
-    private UndoParcel mUndoParcel = new UndoParcel(); // 撤销与重做缓存
-    private UndoParcel mRedoParcel = new UndoParcel(); // 撤销与重做缓存
-    private boolean mUndoRedo = false; // 是否撤销过
+	private UndoParcel mUndoParcel = new UndoParcel(); // 撤销与重做缓存
+	private UndoParcel mRedoParcel = new UndoParcel(); // 撤销与重做缓存
+	private boolean mUndoRedo = false; // 是否撤销过
     private boolean mAutoIndent = false;
     private HashMap<Integer, String> mLineStr = new HashMap<Integer, String>();
-    private int mLineNumber = 0; // 总行数
-    private int mLineNumberWidth = 0; // 行数栏宽度
-    private int mLineNumberLength = 0; // 行数字数
+	private int mLineNumber = 0; // 总行数
+	private int mLineNumberWidth = 0; // 行数栏宽度
+	private int mLineNumberLength = 0; // 行数字数
     private ArrayList<Integer> mLastEditBuffer = new ArrayList<Integer>();
-    private final static int LAST_EDIT_DISTANCE_LIMIT = 20; // 最后编辑位置距离限制，不做同行判断
-    private int mLastEditIndex = -1; // 最后编辑位置功能的游标
+	private final static int LAST_EDIT_DISTANCE_LIMIT = 20; // 最后编辑位置距离限制，不做同行判断
+	private int mLastEditIndex = -1; // 最后编辑位置功能的游标
 
     private final static String TAG = "JecEditText";
     private VelocityTracker mVelocityTracker;
     private FlingRunnable mFlingRunnable;
 	private EmmetEditorImpl emmetEditor;
 
-    private String current_encoding = "UTF-8"; // 当前文件的编码,用于正确回写文件
-    private String current_path = ""; // 当前打开的文件路径
-    private String current_ext = ""; // 当前扩展名
-    private String current_title = ""; // 当前tab标题
-    private int current_linebreak = 0; // 换行字符
-    private int src_text_length; // 原始文本内容长度
-    private long src_text_crc32; // crc校验
+	private String current_encoding = "UTF-8"; // 当前文件的编码,用于正确回写文件
+	private String current_path = ""; // 当前打开的文件路径
+	private String current_ext = ""; // 当前扩展名
+	private String current_title = ""; // 当前tab标题
+	private int current_linebreak = 0; // 换行字符
+	private int src_text_length; // 原始文本内容长度
+	private long src_text_crc32; // crc校验
     private CRC32 mCRC32;
     private boolean mNoWrapMode = false;
-    private int mLineNumX = 0; // 行数位置
+	private int mLineNumX = 0; // 行数位置
     private String mDateFormat = "0";
 
     private Highlight mHighlight;
@@ -102,25 +136,25 @@ public class JecEditText extends EditText
     private static final int TOUCH_DRAG_START_MODE = 2;
     private static final int TOUCH_DONE_MODE = 7;
     private int mTouchMode = TOUCH_DONE_MODE;
-    /** 记录按下第二个点距第一个点的距离 */
+	/** 记录按下第二个点距第一个点的距离 */
     private float oldDist;
-    /** 最小字体 */
+	/** 最小字体 */
     private static final float MIN_TEXT_SIZE = 10f;
-    /** 最大字体 */
+	/** 最大字体 */
     private static final float MAX_TEXT_SIZE = 32.0f;
-    /** 缩放比例 */
+	/** 缩放比例 */
     private float scale = 0.5f;
-    /** 设置字体大小 */
+	/** 设置字体大小 */
     private float mTextSize;
     // whether support multi-touch
     private boolean mSupportMultiTouch;
-    //是否显示输入法
+	// 是否显示输入法
     private static boolean mHideSoftKeyboard;
-    //首字母大写
+	// 首字母大写
     private static boolean mAutoCapitalize = false;
-    //禁止拼写检查
+	// 禁止拼写检查
     private static boolean mDisableSpellCheck = true;
-    //是否使用系统菜单
+	// 是否使用系统菜单
     private static boolean USE_SYSTEM_MENU = false;
 
     // we need this constructor for LayoutInflater
@@ -182,7 +216,7 @@ public class JecEditText extends EditText
             realLineNum = TextUtil.countMatches(mText, '\n', 0, previousLineEnd);
             // Log.v("edittext",
             // "curVisibleLineEnd:"+curVisibleLineEnd+" realLineNum:"+realLineNum);
-            // 如果当前行是新行，则需要+1
+			// 如果当前行是新行，则需要+1
             if(mText.charAt(previousLineEnd) != '\n')
             {
                 realLineNum++;
@@ -232,8 +266,8 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 保存文本各个操作状态
-     */
+	 * 保存文本各个操作状态
+	 */
     @Override
     public Parcelable onSaveInstanceState()
     {
@@ -270,7 +304,7 @@ public class JecEditText extends EditText
         mLineNumberPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         mWhiteSpacePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        // 横屏的时候关闭完成按钮和编辑状态不使用系统的全屏编辑框
+		// 横屏的时候关闭完成按钮和编辑状态不使用系统的全屏编辑框
         // IME_FLAG_NO_EXTRACT_UI: Flag of imeOptions: used to specify that the
         // IME does not need to show its extracted text
         // UI. For input methods that may be fullscreen, often when in landscape
@@ -286,7 +320,7 @@ public class JecEditText extends EditText
         // "done" operation, typically meaning the IME will be closed.
         setImeOptions(EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 
-        // 设置填充
+		// 设置填充
         paddingLeft = getPaddingLeft();
         mFastScroller = new FastScroller(getContext(), this);
         addTextChangedListener(mUndoWatcher);
@@ -307,44 +341,44 @@ public class JecEditText extends EditText
 
         float textHeight;
 
-        // 绘制换行符
+		// 绘制换行符
         mLineBreakPath.reset();
         float width = mTextPaint.measureText("L");
-        // descent为根据当前字体及其大小的基线到下面的距离(正数),ascent则相反
+		// descent为根据当前字体及其大小的基线到下面的距离(正数),ascent则相反
         float mDescent = mTextPaint.descent();
         float mAscent = mTextPaint.ascent();
         textHeight = mDescent - mAscent;
         /**
-         * lineTo在没有moveTo的情况下,默认坐标是0,0；但是要注意,这个坐标是在 "正" 默认坐标是在正字左下角
-         */
-        // 移到底部中央
+		 * lineTo在没有moveTo的情况下,默认坐标是0,0；但是要注意,这个坐标是在 "正" 默认坐标是在正字左下角
+		 */
+		// 移到底部中央
         mLineBreakPath.moveTo(width * 0.6F, 0);
-        // 竖线
+		// 竖线
         mLineBreakPath.lineTo(width * 0.6F, -textHeight * 0.7F);
-        // 左箭头
+		// 左箭头
         mLineBreakPath.moveTo(width * 0.6F, 0);
         mLineBreakPath.lineTo(width * 0.25F, -textHeight * 0.3F);
-        // 右箭头
+		// 右箭头
         mLineBreakPath.moveTo(width * 0.6F, 0);
         mLineBreakPath.lineTo(width * 0.95F, -textHeight * 0.3F);
 
-        // 绘制制表符
+		// 绘制制表符
         mTabPath.reset();
-        width = mTextPaint.measureText("\t\t"); // 制表符4个空格
+		width = mTextPaint.measureText( "\t\t" ); // 制表符4个空格
         textHeight = mTextPaint.descent() - mTextPaint.ascent();
-        // 绘制 >> 符号
+		// 绘制 >> 符号
         mTabPath.moveTo(0, -textHeight * 0.5F);
-        // 绘制箭头下面那部分
+		// 绘制箭头下面那部分
         mTabPath.lineTo(width * 0.1F, -textHeight * 0.35F);
-        // 绘制箭头上面部分
+		// 绘制箭头上面部分
         mTabPath.lineTo(0, -textHeight * 0.2F);
         // two >
         mTabPath.moveTo(width * 0.15F, -textHeight * 0.5F);
-        // 绘制箭头下面那部分
+		// 绘制箭头下面那部分
         mTabPath.lineTo(width * 0.25F, -textHeight * 0.35F);
-        // 绘制箭头上面部分
+		// 绘制箭头上面部分
         mTabPath.lineTo(width * 0.15F, -textHeight * 0.2F);
-        // 判断设备是否支持多点触摸
+		// 判断设备是否支持多点触摸
         PackageManager pm = getContext().getPackageManager();
         mSupportMultiTouch = pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH);
     }
@@ -370,7 +404,7 @@ public class JecEditText extends EditText
             if(JecEditor.isLoading)
                 return;
             mHighlight.redraw();
-            // 撤销，重做
+			// 撤销，重做
             if(lastChange != null)
             {
                 if(count < UndoParcel.MAX_SIZE)
@@ -382,7 +416,7 @@ public class JecEditText extends EditText
                         mUndoParcel.push(lastChange);
                         mRedoParcel.removeAll();
                     }
-                    //注意此操作会引起符号栏
+					// 注意此操作会引起符号栏
                     setUndoRedoButtonStatus();
                 }else
                 {
@@ -391,14 +425,14 @@ public class JecEditText extends EditText
                 }
                 lastChange = null;
             }
-            // 记住最后修改位置
+			// 记住最后修改位置
             int bufSize = mLastEditBuffer.size();
             int lastLoc = 0;
             if(bufSize != 0)
             {
                 lastLoc = mLastEditBuffer.get(bufSize - 1);
             }
-            // 不在附近位置才记住它，不做是否同一行判断，性能问题
+			// 不在附近位置才记住它，不做是否同一行判断，性能问题
             if(Math.abs(start - lastLoc) > LAST_EDIT_DISTANCE_LIMIT)
             {
                 mLastEditBuffer.add(start);
@@ -479,8 +513,8 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 撤销
-     */
+	 * 撤销
+	 */
     public void unDo()
     {
         TextChange textchange = mUndoParcel.pop();
@@ -496,8 +530,8 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 重做
-     */
+	 * 重做
+	 */
     public void reDo()
     {
         TextChange textchange = mRedoParcel.pop();
@@ -513,8 +547,8 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 重置撤销，重做状态
-     */
+	 * 重置撤销，重做状态
+	 */
     public void resetUndoStatus()
     {
         mRedoParcel.clean();
@@ -602,7 +636,7 @@ public class JecEditText extends EditText
             mVelocityTracker = VelocityTracker.obtain();
         }
         mVelocityTracker.addMovement(event);
-        // 是否按住滚动条拖动
+		// 是否按住滚动条拖动
         if(mFastScroller != null)
         {
             boolean intercepted;
@@ -620,7 +654,7 @@ public class JecEditText extends EditText
             }
         }
 
-        // 处理文本快速顺畅地滚动
+		// 处理文本快速顺畅地滚动
         switch(event.getAction())
         {
             case MotionEvent.ACTION_DOWN:
@@ -676,7 +710,7 @@ public class JecEditText extends EditText
                 {
                     cancelLongPress();
                     //mTouchMode = TOUCH_DRAG_MODE;
-                    // 正在移动的点距初始点的距离
+					// 正在移动的点距初始点的距离
                     float newDist = calc_spacing(event);
 
                     if(Math.abs(newDist - oldDist) > 10f)
@@ -706,11 +740,11 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 求出2个触点间的 距离
-     * 
-     * @param event
-     * @return
-     */
+	 * 求出2个触点间的 距离
+	 * 
+	 * @param event
+	 * @return
+	 */
     private float calc_spacing(MotionEvent event)
     {
         if(event.getPointerCount() < 2)
@@ -721,8 +755,8 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 放大
-     */
+	 * 放大
+	 */
     protected void zoomOut()
     {
         mTextSize += scale;
@@ -736,8 +770,8 @@ public class JecEditText extends EditText
     }
 
     /**
-     * 缩小
-     */
+	 * 缩小
+	 */
     protected void zoomIn()
     {
         mTextSize -= scale;
@@ -961,7 +995,7 @@ public class JecEditText extends EditText
         ParagraphStyle[] spans = NO_PARA_SPANS;
 
         // Log.d("Highlight", first+"-"+last+"="+dtop+":"+dbottom);
-        // 这里不要使用getScrollY，因为修改时，光标会变，滚动条不会变，但是高亮需要变
+		// 这里不要使用getScrollY，因为修改时，光标会变，滚动条不会变，但是高亮需要变
         int previousLineEnd2 = mLayout.getLineStart(first >= 3 ? first - 3 : 0);
         mHighlight.render(mText, previousLineEnd2, mLayout.getLineStart(last + 3 > lineCount ? lineCount : last + 3));
 
@@ -970,13 +1004,13 @@ public class JecEditText extends EditText
             return;
         }
 
-        // 显示行数
+		// 显示行数
         int lastline = lineCount < 1 ? 1 : lineCount;
         if(lastline != mLineNumber)
         {
             setLineNumberWidth(lastline);
         }
-        // 设置显示行号的位置
+		// 设置显示行号的位置
         if(mNoWrapMode)
         {
             mLineNumX = mLineNumberWidth + getScrollX();
@@ -987,7 +1021,7 @@ public class JecEditText extends EditText
 
         int right = getWidth();
         int left = getPaddingLeft();
-        // 真实行数
+		// 真实行数
         if(previousLineEnd > 1)
         {
             if(previousLineEnd >= mText.length())
@@ -995,7 +1029,7 @@ public class JecEditText extends EditText
             realLineNum = TextUtil.countMatches(mText, '\n', 0, previousLineEnd);
             // Log.v("edittext",
             // "curVisibleLineEnd:"+curVisibleLineEnd+" realLineNum:"+realLineNum);
-            // 如果当前行是新行，则需要+1
+			// 如果当前行是新行，则需要+1
             if(mText.charAt(previousLineEnd) != '\n')
             {
                 realLineNum++;
@@ -1007,7 +1041,7 @@ public class JecEditText extends EditText
         // Log.v("tag", "f:"+first+" l:"+last);
         hasNewline = true;
 
-        // 为了空白时也默认有一行
+		// 为了空白时也默认有一行
         if(last == 0)
         {
             c.drawLine(mLineNumX, top, mLineNumX, mTextPaint.getTextSize(), mLineNumberPaint);
@@ -1052,7 +1086,7 @@ public class JecEditText extends EditText
                 x = right;
             }
 
-            // jecelyin: 默认左到右，肯定不会有右到左出现
+			// jecelyin: 默认左到右，肯定不会有右到左出现
             // Directions directions = getLineDirections(i);
             Directions directions = DIRS_ALL_LEFT_TO_RIGHT;
             // android.text.Layout.Directions directions =
@@ -1069,7 +1103,7 @@ public class JecEditText extends EditText
         // linenum
         if(mShowLineNum)
         {
-            // 竖线
+			// 竖线
             // drawLine (float startX, float startY, float stopX, float stopY,
             // Paint paint)
             canvas.drawLine(mLineNumX, top, mLineNumX, islastline ? bottom + (bottom - top) : bottom, mLineNumberPaint);
@@ -1341,7 +1375,7 @@ public class JecEditText extends EditText
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
         boolean result = super.onKeyDown(keyCode, event);
-        // 自动缩进
+		// 自动缩进
         if(mAutoIndent && keyCode == KeyEvent.KEYCODE_ENTER)
         {
             Editable mEditable = (Editable) mText;
@@ -1380,7 +1414,8 @@ public class JecEditText extends EditText
                 }
             }
         }
-		else if(keyCode==KeyEvent.KEYCODE_TAB){
+		else if ( keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN )
+		{
 			return expand();
 		//	emmet.
 		}
@@ -1454,12 +1489,12 @@ public class JecEditText extends EditText
     {
         CharSequence text = getText();
         int hash = text.length();
-        //长度不相等，肯定是有更改了
+		// 长度不相等，肯定是有更改了
         if(src_text_length != hash)
         {
             return true;
         }
-        //进行CRC检验
+		// 进行CRC检验
         mCRC32.reset();
         byte bytes[] = getString().getBytes();
         mCRC32.update(bytes,0,bytes.length);
@@ -1504,7 +1539,7 @@ public class JecEditText extends EditText
             show = false;
         }
         if(show)
-        { // 显示键盘，即输入法
+		{ // 显示键盘，即输入法
             int type = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
             if ( mAutoCapitalize ){
                 type |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
@@ -1520,7 +1555,7 @@ public class JecEditText extends EditText
                 imm.showSoftInput(this, 0);
             }
         }else
-        { // 隐藏键盘
+		{ // 隐藏键盘
             setRawInputType(0);
             if(imm != null)
             {
@@ -1720,33 +1755,33 @@ public class JecEditText extends EditText
             }
         }
         
-        // 重复行或选中的文本
+		// 重复行或选中的文本
         int menu_line = selection ? R.string.duplicate_selected_text : R.string.duplicate_line;
         menu.add(0, R.id.duplicate_line, 0, menu_line).setOnMenuItemClickListener(handler);
-        // 转为小写
+		// 转为小写
         menu.add(0, R.id.to_lower, 0, R.string.to_lower).setOnMenuItemClickListener(handler);
-        // 转为大写
+		// 转为大写
         menu.add(0, R.id.to_upper, 0, R.string.to_upper).setOnMenuItemClickListener(handler);
-        // 跳转到指定行
+		// 跳转到指定行
         menu.add(0, R.id.go_to_begin, 0, R.string.go_to_begin).setOnMenuItemClickListener(handler);
-        // 跳转到指定行
+		// 跳转到指定行
         menu.add(0, R.id.go_to_end, 0, R.string.go_to_end).setOnMenuItemClickListener(handler);
-        // 跳转到指定行
+		// 跳转到指定行
         menu.add(0, R.id.goto_line, 0, R.string.goto_line).setOnMenuItemClickListener(handler);
         
-        // 插入时间
+		// 插入时间
         String date = TimeUtil.getDateByFormat(mDateFormat);
         menu.add(0, R.id.insert_datetime, 0, getResources().getString(R.string.insert_datetime)+date).setOnMenuItemClickListener(handler);
 
         if(mHideSoftKeyboard)
         {
-            // 显示输入法
+			// 显示输入法
             menu.add(0, R.id.show_ime, 0, R.string.show_ime).setOnMenuItemClickListener(handler);
         } else {
-            // 隐藏输入法
+			// 隐藏输入法
             menu.add(0, R.id.hide_ime, 0, R.string.hide_ime).setOnMenuItemClickListener(handler);
         }
-        //文档统计
+		// 文档统计
         menu.add(0, R.id.doc_stat, 0, R.string.doc_stat).setOnMenuItemClickListener(handler);
         
         menu.setHeaderTitle(R.string.editTextMenuTitle);
@@ -1920,7 +1955,7 @@ public class JecEditText extends EditText
                 CharSequence text2;
                 int offset;
                 if(selStart == selEnd)
-                {//重复行
+				{// 重复行
                     int s=selStart,e=selEnd;
                     for(;--s>=0;)
                     {
@@ -1945,7 +1980,7 @@ public class JecEditText extends EditText
                     text2="\n"+mText.subSequence(s, e);
                     offset=e;
                 } else {
-                    //重复选中的文本
+					// 重复选中的文本
                     text2=mText.subSequence(min, max);
                     offset=max;
                 }
@@ -1964,13 +1999,13 @@ public class JecEditText extends EditText
                 
                 sb.append(context.getString(R.string.filename))
                 .append("\t\t").append(getPath()).append("\n\n")
-                //总长度
+						// 总长度
                 .append(context.getString(R.string.total_chars))
                 .append("\t\t").append(mText.length()).append("\n")
-                //总单词数
+						// 总单词数
                 .append(context.getString(R.string.total_words))
                 .append("\t\t").append(i).append("\n")
-                //总行数
+						// 总行数
                 .append(context.getString(R.string.total_lines))
                 .append("\t\t").append(TextUtil.countMatches(mText, '\n', 0, mText.length()-1)+1);
                 
@@ -1987,7 +2022,7 @@ public class JecEditText extends EditText
                         }).show();
                 sb = null;
             }
-        //调用TextView的选择文本功能
+		// 调用TextView的选择文本功能
         return super.onTextContextMenuItem(id);
     }
     

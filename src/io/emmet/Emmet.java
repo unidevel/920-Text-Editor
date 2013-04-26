@@ -2,7 +2,6 @@ package io.emmet;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -24,6 +23,8 @@ public class Emmet {
 	
 	private Emmet() {
 		cx = Context.enter();
+		cx.setOptimizationLevel( -1 );
+		cx.setLanguageVersion( Context.VERSION_1_7 );
 		scope = cx.initStandardObjects();
 		try {
 			// load core
@@ -119,7 +120,8 @@ public class Emmet {
 		}
 		
 		// evaluate code
-		Object result = cx.evaluateString(scope, name + "(" + jsArgs.toString() + ");", "<eval>", 1, null);
+		String script = name + "(" + jsArgs.toString() + ");";
+		Object result = cx.evaluateString( scope, script, "<eval>", 1, null );
 		
 		// remove temp variables
 		for (int i = 0; i < vargs.length; i++) {
