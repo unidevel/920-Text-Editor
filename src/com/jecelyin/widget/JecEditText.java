@@ -15,65 +15,32 @@
 
 package com.jecelyin.widget;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.CRC32;
+import android.app.*;
+import android.content.*;
+import android.content.pm.*;
+import android.content.res.*;
+import android.graphics.*;
+import android.os.*;
+import android.text.*;
+import android.text.method.*;
+import android.text.style.*;
+import android.util.*;
+import android.view.*;
+import android.view.inputmethod.*;
+import android.widget.*;
+import com.jecelyin.colorschemes.*;
+import com.jecelyin.editor.*;
+import com.jecelyin.editor.UndoParcel.*;
+import com.jecelyin.highlight.*;
+import com.jecelyin.util.*;
+import io.emmet.*;
+import io.emmet.editor920.*;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
+import java.util.zip.*;
 
-import com.jecelyin.colorschemes.ColorScheme;
-import com.jecelyin.editor.JecEditor;
-import com.jecelyin.editor.R;
-import com.jecelyin.editor.UndoParcel;
-import com.jecelyin.editor.UndoParcel.TextChange;
-import com.jecelyin.highlight.Highlight;
-import com.jecelyin.util.FileUtil;
-import com.jecelyin.util.TextUtil;
-import com.jecelyin.util.TimeUtil;
-
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.ClipboardManager;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.Layout;
-import android.text.Selection;
-import android.text.Spannable;
-import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.TextWatcher;
-import android.text.method.MetaKeyKeyListener;
-import android.text.method.PasswordTransformationMethod;
-import android.text.method.Touch;
-import android.text.style.ParagraphStyle;
-import android.text.style.TabStopSpan;
-import android.text.style.URLSpan;
-import android.util.AttributeSet;
-import android.util.FloatMath;
-import android.view.ContextMenu;
-import android.view.KeyEvent;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.Scroller;
-import android.widget.Toast;
 
 public class JecEditText extends EditText
 {
@@ -113,6 +80,7 @@ public class JecEditText extends EditText
     private final static String TAG = "JecEditText";
     private VelocityTracker mVelocityTracker;
     private FlingRunnable mFlingRunnable;
+	private EmmetEditorImpl emmetEditor;
 
     private String current_encoding = "UTF-8"; // 当前文件的编码,用于正确回写文件
     private String current_path = ""; // 当前打开的文件路径
@@ -161,7 +129,82 @@ public class JecEditText extends EditText
         super(context, attrs);
         // init();
     }
+	
+	/**
+	 * Runs Emmet action, automatically setting up context editor
+	 * @param actionName Action name to perform
+	 * @return
+	 */
+	public boolean run(String actionName) {
+		if (emmetEditor != null) {
+			try {
+				return Emmet.getSingleton().runAction(emmetEditor, actionName);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
+		return false;
+	}
+	
+		
+	public boolean expand() {
+		Emmet js = Emmet.getSingleton();
+//		String profileName = "eclipse";
+		
+		if (emmetEditor != null) {
+			try {
+				
+				// expand abbreviation with current profile
+				return js.runAction(emmetEditor, "expand_abbreviation", emmetEditor.getSyntax());
+			} catch (Exception e) {
+				Log.e("expand",e.getMessage(),e);
+				e.printStackTrace();
+			}
+			
+		}
+		return false;
+	}
+
+	public int getLineForOffset(int offset)
+	{
+		return this.mLayout.getLineForOffset(offset);
+	}
+
+	public String getLineString(int line)
+	{
+		int previousLineEnd = mLayout.getLineStart(line);
+		int realLineNum = 0;
+		if(previousLineEnd > 1)
+        {
+            if(previousLineEnd >= mText.length())
+                return null;
+            realLineNum = TextUtil.countMatches(mText, '\n', 0, previousLineEnd);
+            // Log.v("edittext",
+            // "curVisibleLineEnd:"+curVisibleLineEnd+" realLineNum:"+realLineNum);
+            // 如果当前行是新行，则需要+1
+            if(mText.charAt(previousLineEnd) != '\n')
+            {
+                realLineNum++;
+            }
+        }else
+        {
+            realLineNum = 1;
+        }
+		String lineString = mLineStr.get(realLineNum);
+		return lineString;
+	}
+	
+	public int getLineStart(int line)
+	{
+		return this.mLayout.getLineStart(line);
+	}
+	
+	public int getLineEnd(int line)
+	{
+		return this.mLayout.getLineEnd(line);
+	}
+	
     private static class JecSaveState extends BaseSavedState
     {
         UndoParcel mRedoParcelState;
@@ -222,6 +265,7 @@ public class JecEditText extends EditText
         mCRC32 = new CRC32();
         mHighlight = new Highlight();
         mWorkPaint = new TextPaint();
+		emmetEditor = new EmmetEditorImpl(this);
         mTextPaint = getPaint(); // new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mLineNumberPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -1336,6 +1380,10 @@ public class JecEditText extends EditText
                 }
             }
         }
+		else if(keyCode==KeyEvent.KEYCODE_TAB){
+			return expand();
+		//	emmet.
+		}
         return result;
     }
 
