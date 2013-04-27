@@ -1416,7 +1416,13 @@ public class JecEditText extends EditText
         }
 		else if ( keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN )
 		{
-			return expand();
+			if(!expand()){
+				Editable mEditable = (Editable) mText;
+				int start = getSelectionStart();
+				int end = getSelectionEnd();
+				mEditable.replace(start, end, "\t");
+			}
+			return true;
 		//	emmet.
 		}
         return result;
