@@ -16,8 +16,6 @@
 
 package com.jecelyin.widget;
 
-import com.jecelyin.editor.R;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -27,6 +25,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import com.jecelyin.editor.emmet.R;
 
 /**
  *
@@ -82,7 +81,7 @@ public class TabWidget extends LinearLayout {
         // to a tab other than the current tab
         setFocusable(true);
         View mView = (View)LayoutInflater.from(context).inflate(R.layout.tab_menu, null);
-        //不能这么用，一定要传正确的context，不然无法点其它地方关闭菜单
+		// 不能这么用，一定要传正确的context，不然无法点其它地方关闭菜单
         //mPopup = new PopupWindow(mView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         mPopup = new PopupWindow(context);
         mPopup.setContentView(mView);
@@ -91,10 +90,10 @@ public class TabWidget extends LinearLayout {
         mPopup.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
         mPopup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-        //点击其它地方关闭菜单
+		// 点击其它地方关闭菜单
         mPopup.setOutsideTouchable(true);
         mPopup.setFocusable(true);
-        //背景透明，不能设置为null
+		// 背景透明，不能设置为null
         mPopup.setBackgroundDrawable(new BitmapDrawable());
         
         LinearLayout linearLayout_closeothers = (LinearLayout)mView.findViewById(R.id.linearLayout_closeothers);
@@ -250,9 +249,9 @@ public class TabWidget extends LinearLayout {
 
         super.addView(child);
 
-        //触发onFocusChange
+		// 触发onFocusChange
         child.setOnClickListener(mOnClickListener);
-        //右键菜单
+		// 右键菜单
         child.setOnLongClickListener(new OnLongClickListener() {
             
             @Override
@@ -333,7 +332,7 @@ public class TabWidget extends LinearLayout {
                 
             }
         }
-        //覆盖在其它tab上面，即是将它置于最前
+		// 覆盖在其它tab上面，即是将它置于最前
         mView = getChildAt(mSelectedTab);
         if(mView != null)
             drawChild(paramCanvas, mView, drawingTime);

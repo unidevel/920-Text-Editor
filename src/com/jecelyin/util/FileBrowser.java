@@ -15,27 +15,27 @@
 
 package com.jecelyin.util;
 
-import com.jecelyin.editor.EncodingList;
-import com.jecelyin.editor.JecEditor;
-import com.jecelyin.editor.R;
-import com.jecelyin.widget.JecButton;
-import com.stericson.RootTools.RootTools;
-
 import java.io.File;
 import java.io.IOException;
-//import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-
 import java.util.List;
-
+import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -48,15 +48,13 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import com.jecelyin.editor.EncodingList;
+import com.jecelyin.editor.JecEditor;
+import com.jecelyin.editor.emmet.R;
+import com.jecelyin.widget.JecButton;
+import com.stericson.RootTools.RootTools;
+
+//import java.text.SimpleDateFormat;
 
 /**
  * 文件选择器
@@ -66,13 +64,13 @@ import android.graphics.BitmapFactory;
  */
 public class FileBrowser extends ListActivity
 {
-    private ArrayList<File> files; //当前文件列表
+	private ArrayList<File> files; // 当前文件列表
     private FileListAdapter fileListAdapter;
     private SharedPreferences pref;
     private LinearLayout pathButtons;
     private String default_filename = "";
-    private int request_mode = 0; //0打开， 1保存模式，2选择路径
-    private String current_path = ""; //当前路径
+	private int request_mode = 0; // 0打开， 1保存模式，2选择路径
+	private String current_path = ""; // 当前路径
     private boolean isRoot = false;
     private EditText editTextFilename;
     private Intent mIntent;
@@ -112,7 +110,7 @@ public class FileBrowser extends ListActivity
         File file = android.os.Environment.getExternalStorageDirectory();
         pref = PreferenceManager.getDefaultSharedPreferences(this);
         current_path = pref.getString("last_path", file.getPath());
-        //获取传来的数据
+		// 获取传来的数据
         mIntent = getIntent();
         default_filename = mIntent.getStringExtra("filename");
         request_mode = mIntent.getIntExtra("mode", 0);
@@ -172,11 +170,11 @@ public class FileBrowser extends ListActivity
     {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        //打开方式...
+		// 打开方式...
         menu.add(0, R.string.open_with, 0, R.string.open_with);
-        //重命名
+		// 重命名
         menu.add(0, R.string.rename, 0, R.string.rename);
-        //删除
+		// 删除
         menu.add(0, R.string.delete, 0, R.string.delete);
     }
     
@@ -285,16 +283,16 @@ public class FileBrowser extends ListActivity
     @Override
     public void finish()
     {
-        //记住最后打开的路径
+		// 记住最后打开的路径
         pref.edit().putString("last_path", current_path).commit();
         super.finish();
     }
 
     /**
-     * 显示文件列表
-     * 
-     * @param path
-     */
+	 * 显示文件列表
+	 * 
+	 * @param path
+	 */
     private void showFileList(File path)
     {
         String curPath;
@@ -305,16 +303,16 @@ public class FileBrowser extends ListActivity
         {
             curPath = path.getPath().replaceAll("/./", "/");
         }
-        //设置标题
+		// 设置标题
         setTitle(curPath);
         
         current_path = curPath;
-        //处理顶部路径按钮
+		// 处理顶部路径按钮
         String[] paths=curPath.split(File.separator);
         JecButton mButton;
         StringBuilder mStringBuilder = new StringBuilder();
         pathButtons.removeAllViews();
-        //始终显示根按钮
+		// 始终显示根按钮
         if(paths.length < 1)
             paths = new String[]{File.separator};
         for(String p: paths)
@@ -331,7 +329,7 @@ public class FileBrowser extends ListActivity
             pathButtons.addView(mButton);
         }
         
-        //不能读取的才开启ROOT权限访问
+		// 不能读取的才开启ROOT权限访问
         files = FileUtil.getFileList(curPath, isRoot && !path.canRead() && RootTools.isAccessGiven()); //path.listFiles();
         if(files == null)
         {
@@ -405,7 +403,7 @@ class FileListAdapter extends ArrayAdapter<File>
     private Bitmap mIcon_video;
     private Bitmap mIcon_apk;
     private ViewHolder holder;
-    //各种类型图标
+	// 各种类型图标
     private String[] type_audio = { ".m4a", ".mp3", ".wma", ".mid", ".xmf", ".ogg", ".wav" };
     private String[] type_video = { ".3gp", ".mp4", ".avi", ".rm", ".rmvb" };
     private String[] type_image = { ".jpg", ".gif", ".png", ".bmp", ".jpeg" };
@@ -415,12 +413,12 @@ class FileListAdapter extends ArrayAdapter<File>
         super(context,Resource,objects);
         mInflater = LayoutInflater.from(context);
         Resources res = context.getResources();
-        mIcon_folder = BitmapFactory.decodeResource(res, R.drawable.folder); // 文件夹的图文件
-        mIcon_file = BitmapFactory.decodeResource(res, R.drawable.file); // 文件的图文件
-        mIcon_image = BitmapFactory.decodeResource(res, R.drawable.image); // 图片的图文件
-        mIcon_audio = BitmapFactory.decodeResource(res, R.drawable.audio); // 音频的图文件
-        mIcon_video = BitmapFactory.decodeResource(res, R.drawable.video); // 视频的图文件
-        mIcon_apk = BitmapFactory.decodeResource(res, R.drawable.apk); // apk文件
+		mIcon_folder = BitmapFactory.decodeResource( res, R.drawable.folder ); // 文件夹的图文件
+		mIcon_file = BitmapFactory.decodeResource( res, R.drawable.file ); // 文件的图文件
+		mIcon_image = BitmapFactory.decodeResource( res, R.drawable.image ); // 图片的图文件
+		mIcon_audio = BitmapFactory.decodeResource( res, R.drawable.audio ); // 音频的图文件
+		mIcon_video = BitmapFactory.decodeResource( res, R.drawable.video ); // 视频的图文件
+		mIcon_apk = BitmapFactory.decodeResource( res, R.drawable.apk ); // apk文件
         
     }
 
@@ -433,9 +431,9 @@ class FileListAdapter extends ArrayAdapter<File>
 
         if(convertView == null)
         {
-            /* 使用自定义的list_items作为Layout */
+			/* 使用自定义的list_items作为Layout */
             convertView = mInflater.inflate(R.layout.file_list, null);
-            /* 初始化holder的text与icon */
+			/* 初始化holder的text与icon */
             holder = new ViewHolder();
             holder.f_title = (TextView) convertView.findViewById(R.id.f_title);
             holder.f_text = (TextView) convertView.findViewById(R.id.f_text);
@@ -471,7 +469,7 @@ class FileListAdapter extends ArrayAdapter<File>
                 holder.f_icon.setImageBitmap(mIcon_file);
             }
         }
-        //底部内容 最后修改时间及大小
+		// 底部内容 最后修改时间及大小
         StringBuilder textStringBuilder = new StringBuilder();
         //textStringBuilder.append((new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")).format(new Date(file.lastModified())))
         //.append("   ");
@@ -493,9 +491,9 @@ class FileListAdapter extends ArrayAdapter<File>
     }
 
     /**
-     * @param file
-     *            文件名
-     */
+	 * @param file
+	 *            文件名
+	 */
     private String getMimeType(String file)
     {
         for(String ext:type_audio)

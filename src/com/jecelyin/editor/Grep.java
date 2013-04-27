@@ -3,7 +3,6 @@ package com.jecelyin.editor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -12,11 +11,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -27,7 +25,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.jecelyin.editor.emmet.R;
 import com.jecelyin.util.FileBrowser;
 
 public class Grep extends Activity
@@ -134,15 +132,15 @@ public class Grep extends Activity
     }
 
     /**
-     * startActivityForResult回调函数
-     * 
-     * @param requestCode
-     *            这里的requestCode就是前面启动新Activity时的带过去的requestCode
-     * @param resultCode
-     *            resultCode则关联上了setResult中的resultCode
-     * @param data
-     *            返回的Intent参数
-     */
+	 * startActivityForResult回调函数
+	 * 
+	 * @param requestCode
+	 *            这里的requestCode就是前面启动新Activity时的带过去的requestCode
+	 * @param resultCode
+	 *            resultCode则关联上了setResult中的resultCode
+	 * @param data
+	 *            返回的Intent参数
+	 */
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if(RESULT_OK != resultCode)

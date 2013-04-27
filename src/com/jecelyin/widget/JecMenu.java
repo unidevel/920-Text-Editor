@@ -3,10 +3,6 @@ package com.jecelyin.widget;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.jecelyin.editor.JecEditor;
-import com.jecelyin.editor.R;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -21,6 +17,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import com.jecelyin.editor.JecEditor;
+import com.jecelyin.editor.emmet.R;
 
 public class JecMenu extends Dialog implements OnItemClickListener
 {
@@ -95,7 +93,7 @@ public class JecMenu extends Dialog implements OnItemClickListener
       this.s = (int)getContext().getResources().getDimension(2131230777);
       getWindow().setBackgroundDrawableResource(2130838102);*/
       getWindow().setBackgroundDrawableResource(R.drawable.main_menu_bg);
-      //按非窗口区域时，可以关闭窗口
+		// 按非窗口区域时，可以关闭窗口
       setCanceledOnTouchOutside(true);
       //Toast.makeText(getContext(), "Menu onCreate", Toast.LENGTH_LONG).show();
     }

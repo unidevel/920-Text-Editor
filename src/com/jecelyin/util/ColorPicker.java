@@ -15,9 +15,6 @@
 
 package com.jecelyin.util;
 
-import com.jecelyin.editor.R;
-import com.jecelyin.widget.ColorPickerView;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -26,6 +23,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.jecelyin.editor.emmet.R;
+import com.jecelyin.widget.ColorPickerView;
 
 public class ColorPicker extends Dialog {
     public interface OnColorChangedListener {
@@ -48,10 +47,11 @@ public class ColorPicker extends Dialog {
     }
     
     /**
-     * 转换整数颜色值为字符串格式：#ffff00
-     * @param color
-     * @return 注，因为android前2位表示透明值，所以可以截取掉，保留6位即可
-     */
+	 * 转换整数颜色值为字符串格式：#ffff00
+	 * 
+	 * @param color
+	 * @return 注，因为android前2位表示透明值，所以可以截取掉，保留6位即可
+	 */
     public static String getColor(int color)
     {
         

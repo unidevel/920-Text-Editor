@@ -16,15 +16,7 @@
 package com.jecelyin.editor;
 
 import java.io.File;
-
 import org.mozilla.charsetdetector.CharsetDetector;
-
-import com.jecelyin.highlight.Highlight;
-import com.jecelyin.util.LinuxShell;
-import com.jecelyin.util.TimerUtil;
-import com.jecelyin.widget.JecEditText;
-import com.stericson.RootTools.RootTools;
-
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -32,6 +24,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
+import com.jecelyin.editor.emmet.R;
+import com.jecelyin.highlight.Highlight;
+import com.jecelyin.util.LinuxShell;
+import com.jecelyin.util.TimerUtil;
+import com.jecelyin.widget.JecEditText;
+import com.stericson.RootTools.RootTools;
 
 public class AsyncReadFile
 {
@@ -54,7 +52,7 @@ public class AsyncReadFile
 
     public AsyncReadFile(final JecEditor mJecEditor, final String path, final String encoding, final int lineBreak, int selStart, int selEnd)
     {
-        // 加载文件不算改动，不能有撤销操作
+		// 加载文件不算改动，不能有撤销操作
         JecEditor.isLoading = true;
         // mJecEditor.text_content.requestFocus();
         this.mJecEditor = mJecEditor;
@@ -82,7 +80,7 @@ public class AsyncReadFile
                     boolean root = false;
                     if(!file.canRead() && isRoot && RootTools.isAccessGiven())
                     {
-                        // 需要Root权限处理
+						// 需要Root权限处理
                         //RootTools.sendShell("busybox cp " + LinuxShell.getCmdPath(fileString) + " " + tempFile, 1000);
                         RootTools.copyFile(LinuxShell.getCmdPath(fileString), tempFile, true, true);
                         RootTools.sendShell("busybox chmod 777 " + tempFile, 1000);
@@ -123,7 +121,7 @@ public class AsyncReadFile
                     msg.what = RESULT_FAIL;
                     b.putString("error", errorMsg);
                 }catch (OutOfMemoryError e)
-                {//内存不足
+				{// 内存不足
                     final String errorMsg = mJecEditor.getString(R.string.out_of_memory);
                     msg.what = RESULT_FAIL;
                     b.putString("error", errorMsg);
@@ -228,11 +226,11 @@ public class AsyncReadFile
 
         if("".equals(encoding))
         {
-            // 默认为utf-8
+			// 默认为utf-8
             encoding = "UTF-8";
         }else if("GB18030".equals(encoding))
         {
-            // 转换下,不然无法正确解码
+			// 转换下,不然无法正确解码
             encoding = "GBK";
         }
 

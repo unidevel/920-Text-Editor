@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,6 +33,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.jecelyin.editor.emmet.R;
 
 public class HistoryList
 {
@@ -128,7 +128,7 @@ public class HistoryList
         int max = fl.size();
         for (int i = 0; i < max; i++) {
             if (i >= historymax) {
-                // 限制最近打开历史记录条数
+				// 限制最近打开历史记录条数
                 sp.edit().remove(fl.get(i).path);
             } else {
                 items.add(fl.get(i));

@@ -1,12 +1,22 @@
 package io.emmet.editor920;
 
-import android.util.*;
-import com.jecelyin.widget.*;
-import io.emmet.*;
-import java.util.regex.*;
+import io.emmet.IEmmetEditor;
+import io.emmet.SelectionData;
+import io.emmet.TabStop;
+import io.emmet.TabStopStructure;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import android.util.Log;
+import com.jecelyin.widget.JecEditText;
 
 public class EmmetEditorImpl implements IEmmetEditor
 {
+	public static String TYPE_HTML = "html";
+	public static String TYPE_XML = "xml";
+	public static String TYPE_CSS = "css";
+	public static String TYPE_HAML = "haml";
+	public static String TYPE_XSL = "xsl";
+
 	private String caretPlaceholder = "${0}";
 
 	private static Pattern whitespaceBegin = Pattern.compile("^(\\s+)");
@@ -221,14 +231,39 @@ public class EmmetEditorImpl implements IEmmetEditor
 		return this.editor.getText().toString();
 	}
 
+	private String getSyntaxInternal()
+	{
+		String fileExt = this.editor.getCurrentFileExt();
+		if ( fileExt == null )
+			return null;
+		if ( fileExt.equalsIgnoreCase( "xsl" ) )
+			return TYPE_XSL;
+		else if ( fileExt.equalsIgnoreCase( "xml" ) )
+			return TYPE_XML;
+		else if ( fileExt.equalsIgnoreCase( "haml" ) )
+			return TYPE_HAML;
+		else if ( fileExt.equalsIgnoreCase( "sass" ) )
+			return TYPE_CSS;
+		else if ( fileExt.equalsIgnoreCase( "css" ) )
+			return TYPE_CSS;
+		else if ( fileExt.equalsIgnoreCase( ".less." ) )
+			return TYPE_CSS;
+		else if ( fileExt.equalsIgnoreCase( "html" ) )
+			return TYPE_HTML;
+		return null;
+	}
+
 	public String getSyntax()
 	{
-		return "html";
+		String syntax = getSyntaxInternal();
+		if ( syntax == null )
+			return TYPE_HTML;
+		return syntax;
 	}
 
 	public String getProfileName()
 	{
-		return "html";
+		return null;
 	}
 
 	public String prompt(String title)
@@ -253,8 +288,7 @@ public class EmmetEditorImpl implements IEmmetEditor
 
 	public String getFilePath()
 	{
-		// TODO: Implement this method
-		return null;
+		return this.editor.getPath();
 	}
 
 }

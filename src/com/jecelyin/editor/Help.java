@@ -1,10 +1,10 @@
 package com.jecelyin.editor;
 
-import com.jecelyin.util.FileUtil;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import com.jecelyin.editor.emmet.R;
+import com.jecelyin.util.FileUtil;
 
 public class Help
 {

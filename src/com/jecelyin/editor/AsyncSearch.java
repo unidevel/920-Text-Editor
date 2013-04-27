@@ -18,12 +18,12 @@ package com.jecelyin.editor;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.text.Editable;
 import android.widget.Toast;
+import com.jecelyin.editor.emmet.R;
 
 public class AsyncSearch
 {
@@ -43,7 +43,9 @@ public class AsyncSearch
         mJecEditor.getEditText().requestFocus();
         this.mJecEditor = mJecEditor;
         this.next = next;
-        this.start = next ? mJecEditor.getEditText().getSelectionEnd() : mJecEditor.getEditText().getSelectionStart(); //光标位置
+		this.start = next
+				? mJecEditor.getEditText().getSelectionEnd()
+				: mJecEditor.getEditText().getSelectionStart(); // 光标位置
         this.mPattern = !regexp ? escapeMetaChar(pattern) : pattern;
         mData.clear();
         SearchTask mSearchTask = new SearchTask();
@@ -74,7 +76,7 @@ public class AsyncSearch
         this.replaceText = (CharSequence)replaceText;
         this.mJecEditor = mJecEditor;
         this.next = true;
-        this.start = 0; //光标位置
+		this.start = 0; // 光标位置
         this.mPattern = !regexp ? escapeMetaChar(searchText) : searchText;
         mData.clear();
         SearchTask mSearchTask = new SearchTask();
@@ -95,7 +97,7 @@ public class AsyncSearch
             Toast.makeText(mJecEditor.getApplicationContext(), msg, Toast.LENGTH_LONG).show();
         } else if(replaceAll) {
             Editable mText = mJecEditor.getEditText().getText();
-            //一定要从后面开始替换,不然会有问题
+			// 一定要从后面开始替换,不然会有问题
             int end = data.size();
             int[] ret;
             for(int i=end-1; i>=0; i--)
@@ -105,7 +107,7 @@ public class AsyncSearch
             }
         } else {
             int[] ret = data.get(0);
-            //滚动当前找到的内容到中央，不然在底部看得不爽
+			// 滚动当前找到的内容到中央，不然在底部看得不爽
             //int end = mJecEditor.text_content.getText().length();
             /*if(ret[1]+200 <= end)
             {
@@ -196,10 +198,10 @@ public class AsyncSearch
                         mData.add(new int[] {m.start(), m.end()});
                     }
                 } else {
-                    //查找上一个
+					// 查找上一个
                     if( start <= 0 )
                         return true;
-                    //从头开始搜索获取所有位置
+					// 从头开始搜索获取所有位置
                     while ( m.find() )
                     {
                         if ( mCancelled ){
@@ -209,7 +211,7 @@ public class AsyncSearch
                             if(mData.size() > 0) //fixed: Caused by: java.lang.ArrayIndexOutOfBoundsException
                             {
                                 int[] ret = mData.get(mData.size()-1);
-                                //考虑到会边搜索边修改的情况,所以只能每次都穷搜一下
+								// 考虑到会边搜索边修改的情况,所以只能每次都穷搜一下
                                 mData.clear();
                                 mData.add(ret);
                             }

@@ -17,16 +17,12 @@ package com.jecelyin.widget;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.jecelyin.editor.R;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -35,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.jecelyin.editor.emmet.R;
 
 public class SymbolGrid extends RelativeLayout
 {
@@ -74,7 +71,7 @@ public class SymbolGrid extends RelativeLayout
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b)
     {
-        //修正插入字符后，跑回原位的问题
+		// 修正插入字符后，跑回原位的问题
         if(mLeft!=0 && mTop!=0 && mRight!=0 && mBottom!=0)
         {
             offsetLeftAndRight(mLeft-l);
@@ -136,7 +133,7 @@ public class SymbolGrid extends RelativeLayout
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                //为了显示触摸效果
+				// 为了显示触摸效果
                 if(view instanceof TextView)
                 {
                     String txt = ((TextView)view).getText().toString();
@@ -151,22 +148,22 @@ public class SymbolGrid extends RelativeLayout
         });
         
         mDrager.setOnTouchListener(new OnTouchListener() {
-            private int lastX, lastY; // 记录移动的最后的位置
+			private int lastX, lastY; // 记录移动的最后的位置
             
             @Override
             public boolean onTouch(View v, MotionEvent event)
             {
-                // 获取Action
+				// 获取Action
                 int ea = event.getAction();
 
                 switch(ea)
                 {
-                    case MotionEvent.ACTION_DOWN: // 按下
+					case MotionEvent.ACTION_DOWN: // 按下
                         lastX = (int) event.getRawX();
                         lastY = (int) event.getRawY();
                         break;
-                    case MotionEvent.ACTION_MOVE: // 移动
-                        // 移动中动态设置位置
+					case MotionEvent.ACTION_MOVE: // 移动
+						// 移动中动态设置位置
                         int dx = (int) event.getRawX() - lastX;
                         int dy = (int) event.getRawY() - lastY;
                         mLeft = getLeft() + dx;
@@ -175,11 +172,11 @@ public class SymbolGrid extends RelativeLayout
                         mBottom = getBottom() + dy;
                         layout(mLeft, mTop, mRight, mBottom);
  
-                        // 将当前的位置再次设置
+						// 将当前的位置再次设置
                         lastX = (int) event.getRawX();
                         lastY = (int) event.getRawY();
                         break;
-                    case MotionEvent.ACTION_UP: // 脱离
+					case MotionEvent.ACTION_UP: // 脱离
                         break;
                 }
                 return true;
@@ -190,7 +187,7 @@ public class SymbolGrid extends RelativeLayout
     @Override
     public void setVisibility(int visibility)
     {
-        //不能直接GONE，不然位置会变
+		// 不能直接GONE，不然位置会变
         if(visibility == View.GONE)
             visibility = View.INVISIBLE;
         super.setVisibility(visibility);

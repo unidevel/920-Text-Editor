@@ -16,6 +16,7 @@
 
 package com.jecelyin.widget;
 
+import java.util.ArrayList;
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,13 +32,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-
 import com.jecelyin.colorschemes.ColorScheme;
 import com.jecelyin.editor.JecEditor;
 import com.jecelyin.editor.Options;
-import com.jecelyin.editor.R;
+import com.jecelyin.editor.emmet.R;
 import com.jecelyin.highlight.Highlight;
 import com.jecelyin.widget.JecEditText.OnTextChangedListener;
 import com.jecelyin.widget.TabWidget.OnMenuClickListener;
@@ -78,7 +76,7 @@ public class TabHost extends LinearLayout
     private OnTabCloseListener mOnTabCloseListener;
     
     private OnTextChangedListener mOnTextChangedListener = null;
-    //是否自动创建tab
+	// 是否自动创建tab
     public static boolean autoNewTab = true;
 
     public void setOnTextChangedListener(OnTextChangedListener l)
@@ -156,11 +154,11 @@ public class TabHost extends LinearLayout
             for(JecEditText et : mTabSpecs)
             {
                 if("".equals(et.getPath()) && et.getText().length() == 0)
-                {//空白文档，没有内容时，则不打开新文件
+				{// 空白文档，没有内容时，则不打开新文件
                     setCurrentTab(index);
                     return;
                 } else if(!"".equals(path) && path.equals(et.getPath())) {
-                    //已经打开了
+					// 已经打开了
                     setCurrentTab(index);
                     return;
                 }
@@ -171,7 +169,7 @@ public class TabHost extends LinearLayout
 
         mTabWidget.addView(tabIndicator);
         mTabWidget.setTabSelectionListener(new TabWidget.OnTabSelectionChanged() {
-            //选中标签时的事件
+			// 选中标签时的事件
             public void onTabSelectionChanged(int tabIndex)
             {
                 if(tabIndex != mCurrentTab)
@@ -180,7 +178,7 @@ public class TabHost extends LinearLayout
                     if(mOnTabChangeListener != null)
                         mOnTabChangeListener.onTabChanged(tabIndex);
                 } else {
-                    //关闭当前标签
+					// 关闭当前标签
                     if(mOnTabCloseListener != null)
                     {
                         mOnTabCloseListener.onTabClose(TabWidget.MENU_ACTION_CLOSE_ONE, tabIndex, tabIndex);
@@ -230,11 +228,11 @@ public class TabHost extends LinearLayout
         mEditText.setTypeface(Options.getFont(font));
         String font_size = mPref.getString("font_size", "12");
         mEditText.setTextSize(Float.valueOf(font_size));
-        // 自动换行设置
+		// 自动换行设置
         mEditText.setHorizontallyScrolling(!mPref.getBoolean("wordwrap", true));
-        // 显示行数
+		// 显示行数
         mEditText.setShowLineNum(mPref.getBoolean("show_line_num", true));
-        // 显示空白字符
+		// 显示空白字符
         mEditText.setShowWhitespace(mPref.getBoolean("show_tab", false));
 
         mJecEditor.registerForContextMenu(mEditText);
@@ -252,7 +250,7 @@ public class TabHost extends LinearLayout
         Highlight.loadColorScheme();
         mEditText.setBackgroundColor(Color.parseColor(ColorScheme.color_backgroup));
         mEditText.setTextColor(Color.parseColor(ColorScheme.color_font));
-        //首字母自动大写
+		// 首字母自动大写
         mEditText.setAutoCapitalize(mPref.getBoolean("auto_capitalize", false));
         mEditText.init();
     }
@@ -331,21 +329,19 @@ public class TabHost extends LinearLayout
         mCurrentEditText.show();
         if(mOnTabChangeListener != null)
             mOnTabChangeListener.onTabChanged(mCurrentTab);
-        //切换到最前
+		// 切换到最前
         scrollToSelected();
         
         // Call the tab widget's focusCurrentTab(), instead of just
         // selecting the tab.
         //mTabWidget.focusCurrentTab(mCurrentTab);
         
-        /*if(!mTabWidget.hasFocus())
-        {
-            // if the tab widget didn't take focus (likely because we're in
-            // touch mode)
-            // give the current tab content view a shot
-            // 不能使用，避免输入法弹出来
-            // mCurrentEditText.requestFocus();
-        }*/
+        /*
+		 * if(!mTabWidget.hasFocus()) { // if the tab widget didn't take focus
+		 * (likely because we're in // touch mode) // give the current tab
+		 * content view a shot // 不能使用，避免输入法弹出来 //
+		 * mCurrentEditText.requestFocus(); }
+		 */
 
         // mTabContent.requestFocus(View.FOCUS_FORWARD);
         // invokeOnTabChangeListener();
@@ -364,16 +360,19 @@ public class TabHost extends LinearLayout
     }
 
     /**
-     * 标签关闭前要触发的事件
-     */
+	 * 标签关闭前要触发的事件
+	 */
     public interface OnTabCloseListener
     {
         /**
-         * 安全地关闭标签
-         * @param action
-         * @param startIndex 触发动作时的标签位置
-         * @param curIndex 当前标签位置
-         */
+		 * 安全地关闭标签
+		 * 
+		 * @param action
+		 * @param startIndex
+		 *            触发动作时的标签位置
+		 * @param curIndex
+		 *            当前标签位置
+		 */
         public void onTabClose(int action, int startIndex, int curIndex);
     }
     

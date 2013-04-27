@@ -27,12 +27,12 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
-//import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.SectionIndexer;
 import android.widget.EditText;
+import android.widget.SectionIndexer;
+import com.jecelyin.editor.emmet.R;
 
-import com.jecelyin.editor.R;
+//import android.util.Log;
 
 /**
  * Helper class for AbsListView to draw and control the Fast Scroll thumb
@@ -40,7 +40,7 @@ import com.jecelyin.editor.R;
 class FastScroller {
 
     // Minimum number of pages to justify showing a fast scroll thumb
-    private static int MIN_PAGES = 1;//jecelyin: 超过一页就显示滚动条
+	private static int MIN_PAGES = 1;// jecelyin: 超过一页就显示滚动条
     // Scroll thumb not showing
     private static final int STATE_NONE = 0;
     // Not implemented yet - fade-in transition

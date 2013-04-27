@@ -17,7 +17,6 @@ package com.jecelyin.editor;
 
 
 import java.net.URLEncoder;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -33,8 +32,8 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.widget.Toast;
-
 import com.jecelyin.colorschemes.ColorScheme;
+import com.jecelyin.editor.emmet.R;
 import com.jecelyin.util.ColorPicker;
 import com.jecelyin.util.TimeUtil;
 

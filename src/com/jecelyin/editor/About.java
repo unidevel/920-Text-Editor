@@ -18,6 +18,7 @@ package com.jecelyin.editor;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
+import com.jecelyin.editor.emmet.R;
 
 public class About extends Activity
 {
