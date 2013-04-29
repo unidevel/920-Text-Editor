@@ -820,6 +820,7 @@ public class JecEditor extends Activity
         btnOpen.setOnClickListener(onBtnOpenClicked);
         ImageButton btnSave = (ImageButton) findViewById(R.id.btn_save);
         btnSave.setOnClickListener(onBtnSaveClicked);
+		
         bindUndoButtonClickEvent();
         bindRedoButtonClickEvent();
 
